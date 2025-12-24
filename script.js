@@ -1,7 +1,7 @@
-// script.js - Full standalone script for Millionaire.email user dashboard (GitHub Pages/Netlify)
+// script.js - Login with real account existence check (using list endpoint)
 
 const API_BASE = 'https://mail.millionaire.email/api';
-const API_KEY = 'api_d2l4Zm9ybToyOUdDVlFiQjhzNHEwcDhLeVFyTmZDcmNkOThLWmQ='; // Replace with your user-dashboard API key secret
+const API_KEY = 'api_d2l4Zm9ybToyOUdDVlFiQjhzNHEwcDhLeVFyTmZDcmNkOThLWmQ='; // Your working key
 
 async function apiFetch(path) {
     const response = await fetch(`${API_BASE}${path}`, {
@@ -14,7 +14,7 @@ async function apiFetch(path) {
     return response.json();
 }
 
-/* ================= LOGIN PAGE ================= */
+/* LOGIN PAGE */
 if (document.getElementById('loginForm')) {
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -29,21 +29,28 @@ if (document.getElementById('loginForm')) {
         document.getElementById('loginError').textContent = 'Verifying account...';
 
         try {
-            const data = await apiFetch(`/principal/${encodeURIComponent(email)}`);
+            const data = await apiFetch('/principal');
 
-            if (data.type === "individual") {
+            const items = data.data.items || [];
+
+            const accountExists = items.some(item => 
+                item.emails && Array.isArray(item.emails) && item.emails.some(e => e.toLowerCase() === email.toLowerCase())
+            );
+
+            if (accountExists) {
                 localStorage.setItem('userEmail', email);
                 window.location.href = 'dashboard.html';
             } else {
                 document.getElementById('loginError').textContent = 'Account not found.';
             }
         } catch (err) {
-            document.getElementById('loginError').textContent = 'Invalid account or connection error.';
+            console.error(err);
+            document.getElementById('loginError').textContent = 'Connection error. Try again.';
         }
     });
 }
 
-/* ================= DASHBOARD PAGE ================= */
+/* DASHBOARD PAGE */
 if (document.getElementById('userEmail')) {
     const userEmail = localStorage.getItem('userEmail');
 
@@ -53,52 +60,39 @@ if (document.getElementById('userEmail')) {
 
     document.getElementById('userEmail').textContent = userEmail;
 
-    // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
         localStorage.removeItem('userEmail');
         window.location.href = 'index.html';
     });
 
-    // Load user data from Stalwart
+    // Load user data (single principal)
     const loadUserData = async () => {
         try {
             const data = await apiFetch(`/principal/${encodeURIComponent(userEmail)}`);
 
-            // Storage Usage
+            // Storage
             const used = data.usedQuota || 0;
-            const quota = data.quota || 5368709120; // default 5 GB
+            const quota = data.quota || 5368709120;
             const percent = Math.min(100, (used / quota) * 100);
 
-            const storageFill = document.getElementById('storageUsed');
-            const storageText = document.getElementById('storageText');
+            document.getElementById('storageUsed').style.width = `${percent}%`;
+            document.getElementById('storageText').textContent = 
+                `${(used / 1073741824).toFixed(2)} GB of ${(quota / 1073741824).toFixed(0)} GB used`;
 
-            if (storageFill && storageText) {
-                storageFill.style.width = `${percent}%`;
-                storageText.textContent = `${(used / 1073741824).toFixed(2)} GB of ${(quota / 1073741824).toFixed(0)} GB used`;
-            }
-
-            // Email Aliases
+            // Aliases
             const aliasesList = document.getElementById('aliasesList');
-            if (aliasesList) {
-                aliasesList.innerHTML = '';
-                if (data.emails && data.emails.length > 1) {
-                    data.emails.slice(1).forEach(alias => {
-                        const p = document.createElement('p');
-                        p.textContent = alias;
-                        aliasesList.appendChild(p);
-                    });
-                } else {
-                    aliasesList.innerHTML = '<p>No aliases</p>';
-                }
+            aliasesList.innerHTML = '';
+            if (data.emails && data.emails.length > 1) {
+                data.emails.slice(1).forEach(alias => {
+                    const p = document.createElement('p');
+                    p.textContent = alias;
+                    aliasesList.appendChild(p);
+                });
+            } else {
+                aliasesList.innerHTML = '<p>No aliases</p>';
             }
-
-            // Placeholder for other features (2FA, language, encryption, etc.)
-            document.getElementById('2faStatus').textContent = 'Not available';
-            document.getElementById('encryptionStatus').textContent = 'Server-side enabled';
-
-        } catch (error) {
-            console.error('Failed to load user data:', error);
-            // Optional: show error in UI
+        } catch (err) {
+            console.error(err);
         }
     };
 
