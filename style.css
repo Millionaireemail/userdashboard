@@ -11,6 +11,7 @@ body {
   min-height: 100vh;
 }
 
+/* Login */
 .login-body {
   display: flex;
   align-items: center;
@@ -75,6 +76,7 @@ body {
   margin-top: 1rem;
 }
 
+/* Dashboard */
 .dashboard {
   max-width: 1200px;
   margin: 0 auto;
