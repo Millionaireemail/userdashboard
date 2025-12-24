@@ -10,12 +10,12 @@
 <body class="login-body">
   <div class="login-container">
     <div class="login-card">
-      <img src="https://logo.millionaire.email/logo.svg" alt="Logo" class="logo">
+      <img src="https://logo.millionaire.email/logo.svg" alt="Millionaire.email" class="logo">
       <h1>Millionaire.email</h1>
-      <p class="subtitle">Sign in to manage your premium account</p>
+      <p class="subtitle">Sign in to your premium account</p>
       <form id="loginForm">
-        <input type="email" id="loginEmail" placeholder="your@email.com" required>
-        <input type="password" id="loginPassword" placeholder="Password" required>
+        <input type="email" id="loginEmail" placeholder="your@email.com" required autocomplete="email">
+        <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password">
         <button type="submit">Sign In</button>
       </form>
       <p class="error" id="loginError"></p>
