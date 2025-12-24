@@ -21,7 +21,6 @@
     </header>
 
     <main class="dashboard-grid">
-      <!-- Storage Usage -->
       <section class="card">
         <h2>Storage Usage</h2>
         <div class="storage-bar">
@@ -30,86 +29,22 @@
         <p id="storageText">Loading...</p>
       </section>
 
-      <!-- Change Password -->
-      <section class="card">
-        <h2>Change Password</h2>
-        <input type="password" id="newPassword" placeholder="New password">
-        <input type="password" id="confirmNewPassword" placeholder="Confirm new password">
-        <button id="changePasswordBtn">Update Password</button>
-        <p id="passwordMessage"></p>
-      </section>
-
-      <!-- Two-Factor Authentication -->
-      <section class="card">
-        <h2>Two-Factor Authentication</h2>
-        <label class="switch">
-          <input type="checkbox" id="2faToggle">
-          <span class="slider"></span>
-        </label>
-        <span id="2faStatus">Loading...</span>
-      </section>
-
-      <!-- Aliases -->
       <section class="card">
         <h2>Email Aliases</h2>
         <div id="aliasesList">Loading...</div>
-        <input type="text" id="newAlias" placeholder="new-alias@domain.com">
-        <button id="addAliasBtn">Add Alias</button>
-        <p id="aliasMessage"></p>
       </section>
 
-      <!-- App Passwords -->
       <section class="card">
-        <h2>App Passwords</h2>
-        <div id="appPasswordsList">Loading...</div>
-        <input type="text" id="appName" placeholder="App name (e.g., Thunderbird)">
-        <button id="generateAppPasswordBtn">Generate</button>
-        <p id="appPasswordMessage"></p>
+        <h2>Account Settings</h2>
+        <p>Change password, 2FA, app passwords, language, encryption — coming soon.</p>
       </section>
 
-      <!-- Language & Timezone -->
-      <section class="card">
-        <h2>Language & Timezone</h2>
-        <select id="languageSelect">
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="fr">Français</option>
-          <option value="de">Deutsch</option>
-        </select>
-        <select id="timezoneSelect">
-          <option value="UTC">UTC</option>
-          <option value="America/New_York">Eastern Time</option>
-          <option value="America/Los_Angeles">Pacific Time</option>
-          <option value="Europe/London">London</option>
-          <option value="Asia/Dubai">Dubai</option>
-        </select>
-        <button id="saveSettingsBtn">Save</button>
-      </section>
-
-      <!-- Encryption at Rest -->
-      <section class="card">
-        <h2>Encryption at Rest</h2>
-        <label class="switch">
-          <input type="checkbox" id="encryptionToggle">
-          <span class="slider"></span>
-        </label>
-        <span id="encryptionStatus">Loading...</span>
-      </section>
-
-      <!-- Delete Account -->
       <section class="card danger">
         <h2>Danger Zone</h2>
-        <p>Delete your account and all data permanently.</p>
-        <button id="deleteAccountBtn" class="danger-btn">Delete My Account</button>
+        <p>Delete your account permanently.</p>
+        <button id="deleteAccountBtn" class="danger-btn">Delete Account</button>
       </section>
     </main>
-  </div>
-
-  <div id="messageOverlay" class="overlay">
-    <div class="message-box">
-      <p id="overlayMessage"></p>
-      <button id="closeOverlay">OK</button>
-    </div>
   </div>
 
   <script src="script.js"></script>
