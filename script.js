@@ -1,21 +1,16 @@
-// script.js - Pure JavaScript (no Wix)
+// script.js - Pure JS for GitHub Pages
 
 const API_BASE = 'https://mail.millionaire.email/api';
 const API_KEY = 'api_d2l4Zm9ybToyOUdDVlFiQjhzNHEwcDhLeVFyTmZDcmNkOThLWmQ='; // Your user-dashboard key
 
-async function apiFetch(path, options = {}) {
-    const headers = {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Accept': 'application/json'
-    };
-    if (options.body) {
-        headers['Content-Type'] = 'application/json';
-    }
-
-    const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
-    if (!response.ok) {
-        throw new Error('API error');
-    }
+async function apiFetch(path) {
+    const response = await fetch(`${API_BASE}${path}`, {
+        headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'Accept': 'application/json'
+        }
+    });
+    if (!response.ok) throw new Error('API error');
     return response.json();
 }
 
@@ -50,7 +45,6 @@ if (document.getElementById('loginForm')) {
 /* DASHBOARD PAGE */
 if (document.getElementById('userEmail')) {
     const userEmail = localStorage.getItem('userEmail');
-
     if (!userEmail) {
         window.location.href = 'index.html';
     }
@@ -62,8 +56,8 @@ if (document.getElementById('userEmail')) {
         window.location.href = 'index.html';
     });
 
-    // Load user data
-    const loadUserData = async () => {
+    // Load data
+    const loadData = async () => {
         try {
             const data = await apiFetch(`/principal/${encodeURIComponent(userEmail)}`);
 
@@ -93,5 +87,5 @@ if (document.getElementById('userEmail')) {
         }
     };
 
-    loadUserData();
+    loadData();
 }
