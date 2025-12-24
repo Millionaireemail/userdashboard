@@ -1,7 +1,7 @@
 // script.js - Login with list endpoint check (works with current CORS)
 
 const API_BASE = 'https://mail.millionaire.email/api';
-const API_KEY = 'api_d2l4Zm9ybToyOUdDVlFiQjhzNHEwcDhLeVFyTmZDcmNkOThLWmQ='; // Your key
+const API_KEY = 'api_dXNlcmRhc2hib2FyZDo1azVoQnFJN1Y4TFQ3STYyQUlzN0xERDczMTNqdlk='; // Your key
 
 async function apiFetch(path) {
     const response = await fetch(`${API_BASE}${path}`, {
