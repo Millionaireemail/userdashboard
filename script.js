@@ -1,4 +1,4 @@
-// script.js - Pure JS for GitHub Pages
+// script.js - Secure login with real account existence check
 
 const API_BASE = 'https://mail.millionaire.email/api';
 const API_KEY = 'api_d2l4Zm9ybToyOUdDVlFiQjhzNHEwcDhLeVFyTmZDcmNkOThLWmQ='; // Your user-dashboard key
@@ -10,8 +10,7 @@ async function apiFetch(path) {
             'Accept': 'application/json'
         }
     });
-    if (!response.ok) throw new Error('API error');
-    return response.json();
+    return response;
 }
 
 /* LOGIN PAGE */
@@ -26,18 +25,24 @@ if (document.getElementById('loginForm')) {
             return;
         }
 
-        // Check if account exists
-        try {
-            const data = await apiFetch(`/principal/${encodeURIComponent(email)}`);
+        document.getElementById('loginError').textContent = 'Verifying account...';
 
-            if (data.type === "individual") {
-                localStorage.setItem('userEmail', email);
-                window.location.href = 'dashboard.html';
-            } else {
-                document.getElementById('loginError').textContent = 'Account not found.';
+        try {
+            const response = await apiFetch(`/principal/${encodeURIComponent(email)}`);
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.type === "individual") {
+                    localStorage.setItem('userEmail', email);
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
             }
-        } catch (err) {
-            document.getElementById('loginError').textContent = 'Invalid account.';
+
+            document.getElementById('loginError').textContent = 'Account not found or invalid.';
+        } catch (error) {
+            console.error('Login error:', error);
+            document.getElementById('loginError').textContent = 'Login failed. Check your connection.';
         }
     });
 }
@@ -45,6 +50,7 @@ if (document.getElementById('loginForm')) {
 /* DASHBOARD PAGE */
 if (document.getElementById('userEmail')) {
     const userEmail = localStorage.getItem('userEmail');
+
     if (!userEmail) {
         window.location.href = 'index.html';
     }
@@ -56,36 +62,39 @@ if (document.getElementById('userEmail')) {
         window.location.href = 'index.html';
     });
 
-    // Load data
-    const loadData = async () => {
+    // Load user data
+    const loadUserData = async () => {
         try {
-            const data = await apiFetch(`/principal/${encodeURIComponent(userEmail)}`);
+            const response = await apiFetch(`/principal/${encodeURIComponent(userEmail)}`);
+            if (response.ok) {
+                const data = await response.json();
 
-            // Storage
-            const used = data.usedQuota || 0;
-            const quota = data.quota || 5368709120;
-            const percent = Math.min(100, (used / quota) * 100);
+                // Storage
+                const used = data.usedQuota || 0;
+                const quota = data.quota || 5368709120;
+                const percent = Math.min(100, (used / quota) * 100);
 
-            document.getElementById('storageUsed').style.width = `${percent}%`;
-            document.getElementById('storageText').textContent = 
-                `${(used / 1073741824).toFixed(2)} GB of ${(quota / 1073741824).toFixed(0)} GB used`;
+                document.getElementById('storageUsed').style.width = `${percent}%`;
+                document.getElementById('storageText').textContent = 
+                    `${(used / 1073741824).toFixed(2)} GB of ${(quota / 1073741824).toFixed(0)} GB used`;
 
-            // Aliases
-            const aliasesList = document.getElementById('aliasesList');
-            aliasesList.innerHTML = '';
-            if (data.emails && data.emails.length > 1) {
-                data.emails.slice(1).forEach(alias => {
-                    const p = document.createElement('p');
-                    p.textContent = alias;
-                    aliasesList.appendChild(p);
-                });
-            } else {
-                aliasesList.innerHTML = '<p>No aliases</p>';
+                // Aliases
+                const aliasesList = document.getElementById('aliasesList');
+                aliasesList.innerHTML = '';
+                if (data.emails && data.emails.length > 1) {
+                    data.emails.slice(1).forEach(alias => {
+                        const p = document.createElement('p');
+                        p.textContent = alias;
+                        aliasesList.appendChild(p);
+                    });
+                } else {
+                    aliasesList.innerHTML = '<p>No aliases</p>';
+                }
             }
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error('Failed to load data:', error);
         }
     };
 
-    loadData();
+    loadUserData();
 }
