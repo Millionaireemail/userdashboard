@@ -1,8 +1,9 @@
-// script.js
+// script.js - Shared for login and dashboard pages
 
 const API_BASE = 'https://mail.millionaire.email/api';
-const API_KEY = 'api_dXNlcmRhc2hib2FyZDo1azVoQnFJN1Y4TFQ3STYyQUlzN0xERDczMTNqdlk='; // Use Wix Secrets in production
+const API_KEY = 'api_dXNlcmRhc2hib2FyZDo1azVoQnFJN1Y4TFQ3STYyQUlzN0xERDczMTNqdlk='; // Replace with your user-dashboard API key secret
 
+// Helper to make authenticated API calls
 async function apiFetch(path, options = {}) {
   const headers = {
     'Authorization': `Bearer ${API_KEY}`,
@@ -11,61 +12,81 @@ async function apiFetch(path, options = {}) {
   if (options.body) {
     headers['Content-Type'] = 'application/json';
   }
+
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
-  return response;
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(err || `HTTP ${response.status}`);
+  }
+
+  return response.json();
 }
 
-// Login page
+/* ================= LOGIN PAGE ================= */
 if (document.getElementById('loginForm')) {
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
 
-    // Example: check if user exists (Stalwart doesn't have login API, so use your own auth or skip for demo)
-    try {
-      const response = await apiFetch(`/principal/${encodeURIComponent(email)}`);
-      if (response.ok) {
-        localStorage.setItem('userEmail', email);
-        window.location.href = 'dashboard.html';
-      } else {
-        document.getElementById('loginError').textContent = 'Invalid credentials';
-      }
-    } catch (err) {
-      document.getElementById('loginError').textContent = 'Login failed';
+    if (!email || !password) {
+      document.getElementById('loginError').textContent = 'Please enter email and password.';
+      return;
     }
+
+    // Simple placeholder login — in production, use real auth or Stalwart OAuth
+    // For now, we just store the email and go to dashboard
+    localStorage.setItem('userEmail', email);
+    window.location.href = 'dashboard.html';
   });
 }
 
-// Dashboard page
+/* ================= DASHBOARD PAGE ================= */
 if (document.getElementById('userEmail')) {
   const userEmail = localStorage.getItem('userEmail');
+
   if (!userEmail) {
+    // Not logged in — redirect to login
     window.location.href = 'index.html';
+    return;
   }
+
+  // Show user email
   document.getElementById('userEmail').textContent = userEmail;
 
+  // Logout button
   document.getElementById('logoutBtn').addEventListener('click', () => {
     localStorage.removeItem('userEmail');
     window.location.href = 'index.html';
   });
 
-  // Load user data (example: storage)
-  const loadData = async () => {
+  // Load user data from Stalwart (example: storage quota)
+  const loadUserData = async () => {
     try {
-      const response = await apiFetch(`/principal/${encodeURIComponent(userEmail)}`);
-      if (response.ok) {
-        const data = await response.json();
-        const used = data.usedQuota || 0;
-        const quota = data.quota || 5368709120;
-        const percent = (used / quota) * 100;
-        document.getElementById('storageUsed').style.width = `${percent}%`;
-        document.getElementById('storageText').textContent = `${(used / 1073741824).toFixed(2)} GB of ${(quota / 1073741824).toFixed(0)} GB used`;
+      const data = await apiFetch(`/principal/${encodeURIComponent(userEmail)}`);
+
+      // Update storage bar (example)
+      const used = data.usedQuota || 0;
+      const quota = data.quota || 5368709120; // default 5GB
+      const percent = Math.min(100, (used / quota) * 100);
+
+      const storageUsedEl = document.getElementById('storageUsed');
+      const storageTextEl = document.getElementById('storageText');
+
+      if (storageUsedEl && storageTextEl) {
+        storageUsedEl.style.width = `${percent}%`;
+        storageTextEl.textContent = `${(used / 1073741824).toFixed(2)} GB of ${(quota / 1073741824).toFixed(0)} GB used`;
       }
-    } catch (e) {
-      console.error(e);
+
+      // You can add more UI updates here (aliases, 2FA status, etc.)
+      console.log('User data loaded:', data);
+    } catch (error) {
+      console.error('Failed to load user data:', error);
+      // Optional: show error in UI
     }
   };
 
-  loadData();
+  loadUserData();
 }
