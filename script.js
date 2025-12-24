@@ -1,9 +1,8 @@
-// script.js - Shared logic for login and dashboard
+// script.js - Login with real account existence check
 
 const API_BASE = 'https://mail.millionaire.email/api';
-const API_KEY = 'YOUR_DASHBOARD_API_KEY_SECRET_HERE'; // Replace with your Stalwart user-dashboard API key secret
+const API_KEY = 'api_dXNlcmRhc2hib2FyZDo1azVoQnFJN1Y4TFQ3STYyQUlzN0xERDczMTNqdlk='; // Replace with your user-dashboard API key secret
 
-// Helper for authenticated API calls
 async function apiFetch(path, options = {}) {
     const headers = {
         'Authorization': `Bearer ${API_KEY}`,
@@ -14,11 +13,7 @@ async function apiFetch(path, options = {}) {
     }
 
     const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
-    if (!response.ok) {
-        const err = await response.text();
-        throw new Error(err || `HTTP ${response.status}`);
-    }
-    return response.json();
+    return response;
 }
 
 /* ================= LOGIN PAGE ================= */
@@ -34,18 +29,29 @@ if (document.getElementById('loginForm')) {
             return;
         }
 
-        // Check if email belongs to allowed domains
+        // Check if domain is allowed
         const allowedDomains = ['millionaire.email', 'affluent.email', 'billionaires.me'];
         const domain = email.split('@')[1];
         if (!allowedDomains.includes(domain)) {
-            document.getElementById('loginError').textContent = 'Use your @millionaire.email, @affluent.email, or @billionaires.me address.';
+            document.getElementById('loginError').textContent = 'Use your premium @millionaire.email address.';
             return;
         }
 
-        // In production, verify password via backend IMAP or Stalwart auth
-        // For now, accept any password for allowed domains
-        localStorage.setItem('userEmail', email);
-        window.location.href = 'dashboard.html';
+        document.getElementById('loginError').textContent = 'Verifying account...';
+
+        try {
+            const response = await apiFetch(`/principal/${encodeURIComponent(email)}`);
+
+            if (response.ok) {
+                // Account exists — allow login (in production, verify password too)
+                localStorage.setItem('userEmail', email);
+                window.location.href = 'dashboard.html';
+            } else {
+                document.getElementById('loginError').textContent = 'Account not found. Sign up first.';
+            }
+        } catch (err) {
+            document.getElementById('loginError').textContent = 'Login failed. Try again.';
+        }
     });
 }
 
@@ -54,42 +60,38 @@ if (document.getElementById('userEmail')) {
     const userEmail = localStorage.getItem('userEmail');
 
     if (!userEmail) {
-        // Not logged in — redirect to login
         window.location.href = 'index.html';
     }
 
-    // Display user email
     document.getElementById('userEmail').textContent = userEmail;
 
-    // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
         localStorage.removeItem('userEmail');
         window.location.href = 'index.html';
     });
 
-    // Load user data from Stalwart (example: storage quota)
+    // Load user data
     const loadUserData = async () => {
         try {
-            const data = await apiFetch(`/principal/${encodeURIComponent(userEmail)}`);
+            const response = await apiFetch(`/principal/${encodeURIComponent(userEmail)}`);
+            if (response.ok) {
+                const data = await response.json();
 
-            // Update storage bar (example)
-            const used = data.usedQuota || 0;
-            const quota = data.quota || 5368709120; // 5 GB default
-            const percent = Math.min(100, (used / quota) * 100);
+                // Storage example
+                const used = data.usedQuota || 0;
+                const quota = data.quota || 5368709120;
+                const percent = Math.min(100, (used / quota) * 100);
 
-            const storageFill = document.getElementById('storageUsed');
-            const storageText = document.getElementById('storageText');
+                const storageFill = document.getElementById('storageUsed');
+                const storageText = document.getElementById('storageText');
 
-            if (storageFill && storageText) {
-                storageFill.style.width = `${percent}%`;
-                storageText.textContent = `${(used / 1073741824).toFixed(2)} GB of ${(quota / 1073741824).toFixed(0)} GB used`;
+                if (storageFill && storageText) {
+                    storageFill.style.width = `${percent}%`;
+                    storageText.textContent = `${(used / 1073741824).toFixed(2)} GB of ${(quota / 1073741824).toFixed(0)} GB used`;
+                }
             }
-
-            // You can add more UI updates here (aliases, 2FA status, etc.)
-            console.log('User data loaded:', data);
-        } catch (error) {
-            console.error('Failed to load user data:', error);
-            // Optional: show error in UI
+        } catch (e) {
+            console.error(e);
         }
     };
 
