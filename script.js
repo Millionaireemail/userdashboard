@@ -1,4 +1,4 @@
-// script.js - Login with real account existence check (using list endpoint)
+    // script.js - Login with real account existence check (using list endpoint)
 
 const API_BASE = 'https://mail.millionaire.email/api';
 const API_KEY = 'api_d2l4Zm9ybToyOUdDVlFiQjhzNHEwcDhLeVFyTmZDcmNkOThLWmQ='; // Your working key
