@@ -3,31 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard – Millionaire.email</title>
+  <title>Millionaire.email – Sign In</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="https://logo.millionaire.email/logo.svg" type="image/svg+xml">
 </head>
-<body>
-  <div class="dashboard">
-    <header>
-      <div class="logo-header">
-        <img src="https://logo.millionaire.email/logo.svg" alt="Logo" class="logo">
-        <h1>Millionaire.email</h1>
-      </div>
-      <div class="user-info">
-        <span id="userEmail"></span>
-        <button id="logoutBtn">Logout</button>
-      </div>
-    </header>
-
-    <main class="dashboard-grid">
-      <!-- Add your dashboard sections here (storage, password, aliases, etc.) -->
-      <section class="card">
-        <h2>Welcome</h2>
-        <p>Your premium email dashboard is ready.</p>
-      </section>
-      <!-- More sections... -->
-    </main>
+<body class="login-body">
+  <div class="login-container">
+    <div class="login-card">
+      <img src="https://logo.millionaire.email/logo.svg" alt="Millionaire.email" class="logo">
+      <h1>Millionaire.email</h1>
+      <p class="subtitle">Sign in to your premium account</p>
+      <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="your@email.com" required autocomplete="email">
+        <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password">
+        <button type="submit">Sign In</button>
+      </form>
+      <p class="error" id="loginError"></p>
+    </div>
   </div>
   <script src="script.js"></script>
 </body>
