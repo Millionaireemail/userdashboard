@@ -3,24 +3,339 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Millionaire.email – Sign In</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="https://logo.millionaire.email/logo.svg" type="image/svg+xml">
+  <title>Dashboard - Millionaire Email</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+    }
+    .dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #333;
+    }
+    .logo-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .logo-header .logo {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(90deg, #ffd700, #ffed4e);
+      border-radius: 12px;
+    }
+    header h1 {
+      font-size: 2rem;
+      background: linear-gradient(90deg, #ffd700, #ffed4e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    #logoutBtn {
+      background: #333;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    #logoutBtn:hover {
+      background: #444;
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    .card {
+      background: #111;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .card h2 {
+      margin-bottom: 1.5rem;
+      font-size: 1.4rem;
+    }
+    .info-item {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #222;
+    }
+    .info-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .info-label {
+      color: #aaa;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+    .info-value {
+      font-size: 1.1rem;
+    }
+    a.btn {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      background: #222;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      text-decoration: none;
+      margin-top: 1rem;
+      transition: background 0.3s;
+    }
+    a.btn:hover {
+      background: #333;
+    }
+    .storage-bar {
+      height: 20px;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+    .storage-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #28a745, #20c997);
+      border-radius: 10px;
+      transition: width 0.4s ease;
+    }
+    .danger {
+      border: 1px solid #dc3545;
+    }
+    .danger-btn {
+      background: #dc3545 !important;
+    }
+    .danger-btn:hover {
+      background: #c82333 !important;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.8rem;
+      background: #222;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      margin: 1rem 0;
+    }
+    .alias-list {
+      margin-top: 1rem;
+    }
+    .alias-item {
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #222;
+      font-family: monospace;
+    }
+    .success-msg, .error-msg {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+    .success-msg {
+      background: #155724;
+      color: #d4edda;
+    }
+    .error-msg {
+      background: #721c24;
+      color: #f8d7da;
+    }
+  </style>
 </head>
-<body class="login-body">
-  <div class="login-container">
-    <div class="login-card">
-      <img src="https://logo.millionaire.email/logo.svg" alt="Millionaire.email" class="logo">
-      <h1>Millionaire.email</h1>
-      <p class="subtitle">Sign in to your premium account</p>
-      <form id="loginForm">
-        <input type="email" id="loginEmail" placeholder="your@millionaire.email.email" required>
-        <input type="password" id="loginPassword" placeholder="Password" required>
-        <button type="submit">Sign In</button>
-      </form>
-      <p class="error" id="loginError"></p>
+<body>
+  <div class="dashboard">
+    <header>
+      <div class="logo-header">
+        <div class="logo"></div>
+        <h1>Millionaire Email</h1>
+      </div>
+      <div class="user-info">
+        <span id="userEmail">loading...</span>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </header>
+
+    <div class="dashboard-grid">
+      <!-- Account Info -->
+      <div class="card">
+        <h2>Account Overview</h2>
+        <div class="info-item">
+          <div class="info-label">Primary Email</div>
+          <div class="info-value" id="primaryEmail">loading...</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Storage Used</div>
+          <div class="info-value" id="storageText">loading...</div>
+          <div class="storage-bar">
+            <div class="storage-fill" id="storageFill"></div>
+          </div>
+        </div>
+        <a href="https://mail.millionaire.email" class="btn" target="_blank">Open Webmail</a>
+      </div>
+
+      <!-- Security -->
+      <div class="card">
+        <h2>Security</h2>
+        <a href="https://mail.millionaire.email/account/password" class="btn" target="_blank">Change Password</a>
+        <a href="https://mail.millionaire.email/account/mfa" class="btn" target="_blank">Two-Factor Authentication</a>
+        <a href="https://mail.millionaire.email/account/crypto" class="btn" target="_blank">Encryption at Rest</a>
+        <a href="https://mail.millionaire.email/account/app-passwords" class="btn" target="_blank">App Passwords</a>
+      </div>
+
+      <!-- Aliases -->
+      <div class="card">
+        <h2>Email Aliases</h2>
+        <div id="aliasSection">
+          <input type="text" id="newAlias" placeholder="new-alias (without @millionaire.email)">
+          <button class="btn" id="createAliasBtn">Create Alias</button>
+          <div id="aliasMessage"></div>
+        </div>
+        <div class="alias-list" id="aliasList">
+          Loading aliases...
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="card danger">
+        <h2>Danger Zone</h2>
+        <p style="margin-bottom: 1.5rem; color: #aaa;">
+          To delete your account, send an email to <strong>info@millionaire.email</strong> from your registered address.<br>
+          We will confirm receipt and delete your account within 24 hours.
+        </p>
+        <a href="mailto:info@millionaire.email?subject=Account Deletion Request&body=Please delete my millionaire.email account." 
+           class="btn danger-btn">Send Deletion Request</a>
+      </div>
     </div>
   </div>
-  <script src="script.js"></script>
+
+  <script>
+    // Replace with your actual auth mechanism (e.g., JWT from login)
+    // For demo, we'll assume user email is stored in localStorage after login
+    const userEmail = localStorage.getItem('userEmail') || 'user@millionaire.email';
+    document.getElementById('userEmail').textContent = userEmail;
+    document.getElementById('primaryEmail').textContent = userEmail;
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('userEmail');
+      // Redirect to login page or Stalwart logout
+      window.location.href = 'https://mail.millionaire.email/account/logout';
+    });
+
+    // Stalwart API base
+    const API_BASE = 'https://mail.millionaire.email/api';
+    const API_KEY = 'api_dXNlcmRhc2hib2FyZDo1azVoQnFJN1Y4TFQ3STYyQUlzN0xERDczMTNqdlk=';
+
+    // Load user data (storage, aliases, etc.)
+    async function loadUserData() {
+      try {
+        const res = await fetch(`${API_BASE}/v1/account/${userEmail}`, {
+          headers: { 'Authorization': `Bearer ${API_KEY}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch user data');
+
+        const data = await res.json();
+
+        // Storage example (adjust according to actual API response)
+        const used = data.quota?.used || 0;
+        const limit = data.quota?.limit || 10_000_000_000; // 10GB default
+        const percent = (used / limit) * 100;
+
+        document.getElementById('storageText').textContent = 
+          `${(used / 1_000_000).toFixed(1)} MB / ${(limit / 1_000_000_000).toFixed(0)} GB`;
+        document.getElementById('storageFill').style.width = `${percent}%`;
+
+        // Load aliases
+        const aliasesRes = await fetch(`${API_BASE}/v1/aliases/${userEmail}`, {
+          headers: { 'Authorization': `Bearer ${API_KEY}` }
+        });
+        const aliasesData = await aliasesRes.json();
+        const aliasList = document.getElementById('aliasList');
+        aliasList.innerHTML = '';
+
+        if (aliasesData.aliases && aliasesData.aliases.length > 0) {
+          aliasesData.aliases.forEach(alias => {
+            const div = document.createElement('div');
+            div.className = 'alias-item';
+            div.textContent = alias + '@millionaire.email';
+            aliasList.appendChild(div);
+          });
+        } else {
+          aliasList.innerHTML = '<em>No aliases yet</em>';
+        }
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('aliasList').innerHTML = 'Error loading data';
+      }
+    }
+
+    // Create alias
+    document.getElementById('createAliasBtn').addEventListener('click', async () => {
+      const localPart = document.getElementById('newAlias').value.trim();
+      if (!localPart || !/^[a-z0-9\-_.]+$/.test(localPart)) {
+        showMessage('Invalid alias name', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/v1/alias`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            address: `${localPart}@millionaire.email`,
+            destination: userEmail
+          })
+        });
+
+        if (res.ok) {
+          showMessage(`Alias ${localPart}@millionaire.email created!`, 'success');
+          document.getElementById('newAlias').value = '';
+          loadUserData();
+        } else {
+          const err = await res.json();
+          showMessage(err.message || 'Failed to create alias', 'error');
+        }
+      } catch (err) {
+        showMessage('Network error', 'error');
+      }
+    });
+
+    function showMessage(text, type) {
+      const msgDiv = document.getElementById('aliasMessage');
+      msgDiv.innerHTML = `<div class="${type}-msg">${text}</div>`;
+      setTimeout(() => msgDiv.innerHTML = '', 5000);
+    }
+
+    // Initial load
+    loadUserData();
+  </script>
 </body>
 </html>
