@@ -1,7 +1,7 @@
-// script.js - Login with list endpoint check (works with current CORS)
+// script.js - Login with real account existence check (GitHub Pages compatible)
 
 const API_BASE = 'https://mail.millionaire.email/api';
-const API_KEY = 'api_dXNlcmRhc2hib2FyZDo1azVoQnFJN1Y4TFQ3STYyQUlzN0xERDczMTNqdlk='; // Your key
+const API_KEY = 'api_d2l4Zm9ybToyOUdDVlFiQjhzNHEwcDhLeVFyTmZDcmNkOThLWmQ='; // Your user-dashboard key
 
 async function apiFetch(path) {
     const response = await fetch(`${API_BASE}${path}`, {
@@ -20,31 +20,25 @@ if (document.getElementById('loginForm')) {
         e.preventDefault();
 
         const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
 
-        if (!email) {
-            document.getElementById('loginError').textContent = 'Enter your email.';
+        if (!email || !password) {
+            document.getElementById('loginError').textContent = 'Enter email and password.';
             return;
         }
 
         document.getElementById('loginError').textContent = 'Verifying account...';
 
         try {
-            const data = await apiFetch('/principal'); // List all principals
+            const data = await apiFetch(`/principal/${encodeURIComponent(email)}`);
 
-            const items = data.data.items || [];
-
-            const accountExists = items.some(item => 
-                item.emails && Array.isArray(item.emails) && item.emails.some(e => e.toLowerCase() === email.toLowerCase())
-            );
-
-            if (accountExists) {
+            if (data.type === "individual") {
                 localStorage.setItem('userEmail', email);
                 window.location.href = 'dashboard.html';
             } else {
                 document.getElementById('loginError').textContent = 'Account not found.';
             }
         } catch (err) {
-            console.error(err);
             document.getElementById('loginError').textContent = 'Connection error. Try again.';
         }
     });
@@ -65,7 +59,7 @@ if (document.getElementById('userEmail')) {
         window.location.href = 'index.html';
     });
 
-    // Load user data (single principal)
+    // Load user data
     const loadUserData = async () => {
         try {
             const data = await apiFetch(`/principal/${encodeURIComponent(userEmail)}`);
