@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Millionaire Email</title>
+  <style>
+    /* (Paste all your original CSS here - same as before) */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #000; color: #fff; min-height: 100vh; }
+    .dashboard { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; padding-bottom: 1rem; border-bottom: 1px solid #333; }
+    .logo-header { display: flex; align-items: center; gap: 1rem; }
+    .logo-header .logo { width: 50px; }
+    header h1 { font-size: 2rem; background: linear-gradient(90deg, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .user-info { display: flex; align-items: center; gap: 1rem; }
+    #logoutBtn { background: #333; border: none; padding: 0.5rem 1rem; border-radius: 8px; color: #fff; cursor: pointer; }
+    #logoutBtn:hover { background: #444; }
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+    .card { background: #111; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .card h2 { margin-bottom: 1.5rem; font-size: 1.4rem; }
+    a.btn { display: block; width: 100%; padding: 1rem; background: #222; color: #fff; text-align: center; border-radius: 8px; text-decoration: none; margin-top: 1rem; transition: background 0.3s; }
+    a.btn:hover { background: #333; }
+    .storage-bar { height: 20px; background: #333; border-radius: 10px; overflow: hidden; margin: 1rem 0; }
+    .storage-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #28a745, #20c997); border-radius: 10px; transition: width 0.4s ease; }
+    .danger { border: 1px solid #dc3545; }
+    .danger-btn { background: #dc3545 !important; }
+    .danger-btn:hover { background: #c82333 !important; }
+    /* Add more styles from your original as needed */
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <header>
+      <div class="logo-header">
+        <img src="https://logo.millionaire.email/logo.svg" alt="Logo" class="logo">
+        <h1>Millionaire Email</h1>
+      </div>
+      <div class="user-info">
+        <span id="userEmail">loading...</span>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </header>
+
+    <div class="dashboard-grid">
+      <!-- Account Overview -->
+      <div class="card">
+        <h2>Account Overview</h2>
+        <p><strong>Primary Email:</strong> <span id="primaryEmail">loading...</span></p>
+        <p><strong>Storage:</strong> <span id="storageText">loading...</span></p>
+        <div class="storage-bar"><div class="storage-fill" id="storageFill"></div></div>
+        <a href="https://mail.millionaire.email" class="btn" target="_blank">Open Webmail</a>
+      </div>
+
+      <!-- Security -->
+      <div class="card">
+        <h2>Security</h2>
+        <a href="/password.html" class="btn">Change Password</a>
+        <a href="/mfa.html" class="btn">Two-Factor Authentication</a>
+        <a href="/crypto.html" class="btn">Encryption at Rest</a>
+        <a href="/app-passwords.html" class="btn">App Passwords</a>
+      </div>
+
+      <!-- Aliases (keep your original API code here) -->
+      <!-- ... (same as previous dashboard) -->
+
+      <!-- Danger Zone -->
+      <div class="card danger">
+        <h2>Danger Zone</h2>
+        <p style="margin-bottom: 1.5rem; color: #aaa;">
+          To delete your account, send an email to <strong>info@millionaire.email</strong> from your registered address.<br>
+          We will confirm and delete within 24 hours.
+        </p>
+        <a href="mailto:info@millionaire.email?subject=Account Deletion Request&body=Please delete my millionaire.email account." class="btn danger-btn">Send Deletion Request</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auth check
+    const userEmail = localStorage.getItem('userEmail');
+    if (!userEmail) {
+      window.location.href = '/login.html';
+    }
+    document.getElementById('userEmail').textContent = userEmail;
+    document.getElementById('primaryEmail').textContent = userEmail;
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('userEmail');
+      window.location.href = '/login.html';
+    });
+
+    // Your original API loadUserData() etc. here...
+  </script>
+</body>
+</html>
