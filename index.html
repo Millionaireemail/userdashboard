@@ -1,97 +1,322 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Millionaire Email</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #000;
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .login-container {
-      width: 100%;
-      max-width: 420px;
-      padding: 2rem;
-    }
-    .login-card {
-      background: #111;
-      padding: 3rem;
-      border-radius: 16px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    .logo {
-      width: 80px;
-      margin-bottom: 1rem;
-    }
-    .login-card h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-      background: linear-gradient(90deg, #ffd700, #ffed4e);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .subtitle {
-      color: #aaa;
-      margin-bottom: 2rem;
-    }
-    .login-card input {
-      width: 100%;
-      padding: 1rem;
-      margin: 0.8rem 0;
-      background: #222;
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-    }
-    .login-card button {
-      width: 100%;
-      padding: 1rem;
-      background: linear-gradient(90deg, #28a745, #20c997);
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-size: 1.1rem;
-      cursor: pointer;
-    }
-    .error {
-      color: #ff6b6b;
-      margin-top: 1rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Millionaire Email Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .hidden { display: none; }
+        .section { margin-bottom: 20px; }
+        button { margin-top: 10px; }
+        ul { list-style-type: none; }
+        .error { color: red; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-card">
-      <img src="https://logo.millionaire.email/logo.svg" alt="Millionaire Email Logo" class="logo">
-      <h1>Millionaire Email</h1>
-      <p class="subtitle">Sign in to your account</p>
-      <input type="email" id="email" placeholder="your@millionaire.email" required>
-      <input type="password" id="password" placeholder="Password" required>
-      <button id="loginBtn">Sign In</button>
-      <p class="error" id="errorMsg"></p>
+    <div id="login">
+        <h1>Login</h1>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button onclick="login()">Login</button>
+        <p class="error" id="login-error"></p>
     </div>
-  </div>
 
-  <script>
-    document.getElementById('loginBtn').addEventListener('click', () => {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      if (!email || !password) {
-        document.getElementById('errorMsg').textContent = 'Please fill in all fields';
-        return;
-      }
-      // Simulate login - in production, validate against Stalwart API or redirect to Stalwart login
-      localStorage.setItem('userEmail', email);
-      window.location.href = 'dashboard.html';
-    });
-  </script>
+    <div id="dashboard" class="hidden">
+        <h1>Dashboard</h1>
+        <button onclick="logout()">Logout</button>
+
+        <div class="section">
+            <h2>Storage</h2>
+            <p id="storage-info">Loading...</p>
+        </div>
+
+        <div class="section">
+            <h2>Aliases (up to 10)</h2>
+            <ul id="aliases-list"></ul>
+            <input type="text" id="new-alias" placeholder="New alias (e.g., alias@millionaire.email)">
+            <button onclick="addAlias()">Add Alias</button>
+            <p class="error" id="aliases-error"></p>
+        </div>
+
+        <div class="section">
+            <h2>Change Password</h2>
+            <input type="password" id="new-password" placeholder="New Password" required>
+            <button onclick="changePassword()">Change</button>
+            <p class="error" id="password-error"></p>
+        </div>
+
+        <div class="section">
+            <h2>Encryption-at-Rest</h2>
+            <select id="enc-type">
+                <option value="pgp">PGP</option>
+                <option value="smime">S/MIME</option>
+            </select>
+            <textarea id="public-key" placeholder="Paste public key"></textarea>
+            <select id="enc-algo">
+                <option value="Aes256">AES-256</option>
+                <!-- Add other algos if supported -->
+            </select>
+            <button onclick="uploadEncryptionKey()">Upload</button>
+            <p class="error" id="enc-error"></p>
+        </div>
+
+        <div class="section">
+            <h2>Two-Factor Authentication</h2>
+            <p id="otp-status">Loading...</p>
+            <div id="otp-setup" class="hidden">
+                <div id="qr-code"></div>
+                <input type="text" id="otp-code" placeholder="Verify OTP code">
+                <button onclick="enableOTP()">Enable</button>
+            </div>
+            <button id="toggle-otp" onclick="toggleOTP()">Enable 2FA</button>
+            <p class="error" id="otp-error"></p>
+        </div>
+
+        <div class="section">
+            <h2>Delete Account</h2>
+            <button onclick="requestDelete()">Request Deletion</button>
+            <p id="delete-msg" class="hidden">We received your request and will delete the account within 24 hours.</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://mail.millionaire.email/api/v1';
+        const JMAP_BASE = 'https://mail.millionaire.email/jmap';
+        let auth = '';
+        let email = '';
+        let principalId = '';
+        let totpSecret = '';
+
+        function login() {
+            email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const domain = email.split('@')[1];
+            if (!['millionaire.email', 'affluent.email', 'billionaires.me'].includes(domain)) {
+                document.getElementById('login-error').textContent = 'Invalid domain.';
+                return;
+            }
+            principalId = email; // Assuming configured as full email
+            auth = btoa(`${email}:${password}`);
+            testLogin();
+        }
+
+        async function testLogin() {
+            try {
+                const response = await apiFetch(`${API_BASE}/account/auth`, 'GET');
+                if (!response.ok) throw new Error('Login failed');
+                sessionStorage.setItem('auth', auth);
+                sessionStorage.setItem('email', email);
+                sessionStorage.setItem('principalId', principalId);
+                showDashboard();
+                loadDashboardData();
+            } catch (err) {
+                document.getElementById('login-error').textContent = err.message;
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('login').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+        }
+
+        async function loadDashboardData() {
+            loadStorage();
+            loadAliases();
+            loadOTPStatus();
+        }
+
+        async function loadStorage() {
+            try {
+                const body = {
+                    using: ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:quota"],
+                    methodCalls: [["Quota/get", { accountId: "singleton", ids: null }, "0"]]
+                };
+                const response = await apiFetch(JMAP_BASE, 'POST', body);
+                if (!response.ok) throw new Error('Failed to fetch storage');
+                const data = await response.json();
+                const quota = data.methodResponses[0][1].list.find(q => q.dataType === "octets" && q.scope === "account"); // Adjust if not "blob/octets"
+                const used = quota ? quota.used : 0;
+                const limit = quota ? quota.limit : 0;
+                const remaining = limit - used;
+                document.getElementById('storage-info').textContent = `Remaining: ${remaining} bytes (Used: ${used} / Limit: ${limit})`;
+            } catch (err) {
+                document.getElementById('storage-info').textContent = 'Error loading storage.';
+            }
+        }
+
+        async function loadAliases() {
+            try {
+                const response = await apiFetch(`${API_BASE}/principal/${principalId}`, 'GET');
+                if (!response.ok) throw new Error('Failed to fetch aliases');
+                const data = await response.json();
+                const emails = data.emails || [];
+                const primary = emails[0];
+                const aliases = emails.slice(1);
+                if (aliases.length >= 10) document.getElementById('new-alias').disabled = true;
+                const list = document.getElementById('aliases-list');
+                list.innerHTML = '';
+                aliases.forEach(alias => {
+                    const li = document.createElement('li');
+                    li.textContent = alias;
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = 'Delete';
+                    delBtn.onclick = () => deleteAlias(alias);
+                    li.appendChild(delBtn);
+                    list.appendChild(li);
+                });
+            } catch (err) {
+                document.getElementById('aliases-error').textContent = err.message;
+            }
+        }
+
+        async function addAlias() {
+            const newAlias = document.getElementById('new-alias').value.trim();
+            if (!newAlias) return;
+            try {
+                const body = [{ action: "add", field: "emails", value: newAlias }];
+                const response = await apiFetch(`${API_BASE}/principal/${principalId}`, 'PATCH', body);
+                if (!response.ok) throw new Error('Failed to add alias');
+                loadAliases();
+            } catch (err) {
+                document.getElementById('aliases-error').textContent = err.message;
+            }
+        }
+
+        async function deleteAlias(alias) {
+            try {
+                const body = [{ action: "remove", field: "emails", value: alias }];
+                const response = await apiFetch(`${API_BASE}/principal/${principalId}`, 'PATCH', body);
+                if (!response.ok) throw new Error('Failed to delete alias');
+                loadAliases();
+            } catch (err) {
+                document.getElementById('aliases-error').textContent = err.message;
+            }
+        }
+
+        async function changePassword() {
+            const newPass = document.getElementById('new-password').value;
+            if (!newPass) return;
+            try {
+                const body = [{ action: "set", field: "secrets", value: [newPass] }];
+                const response = await apiFetch(`${API_BASE}/principal/${principalId}`, 'PATCH', body);
+                if (!response.ok) throw new Error('Failed to change password');
+                // Update auth with new password
+                auth = btoa(`${email}:${newPass}`);
+                sessionStorage.setItem('auth', auth);
+                document.getElementById('password-error').textContent = 'Password changed.';
+            } catch (err) {
+                document.getElementById('password-error').textContent = err.message;
+            }
+        }
+
+        async function uploadEncryptionKey() {
+            const type = document.getElementById('enc-type').value.toUpperCase();
+            const algo = document.getElementById('enc-algo').value;
+            const certs = document.getElementById('public-key').value.trim();
+            if (!certs) return;
+            try {
+                const body = { type, algo, certs };
+                const response = await apiFetch(`${API_BASE}/account/crypto`, 'POST', body);
+                if (!response.ok) throw new Error('Failed to upload key');
+                document.getElementById('enc-error').textContent = 'Key uploaded.';
+            } catch (err) {
+                document.getElementById('enc-error').textContent = err.message;
+            }
+        }
+
+        async function loadOTPStatus() {
+            try {
+                const response = await apiFetch(`${API_BASE}/account/auth`, 'GET');
+                if (!response.ok) throw new Error('Failed to fetch OTP status');
+                const data = await response.json();
+                const enabled = data.data.otpEnabled;
+                document.getElementById('otp-status').textContent = `Status: ${enabled ? 'Enabled' : 'Disabled'}`;
+                const toggleBtn = document.getElementById('toggle-otp');
+                toggleBtn.textContent = enabled ? 'Disable 2FA' : 'Enable 2FA';
+                if (!enabled) setupOTPQR();
+            } catch (err) {
+                document.getElementById('otp-error').textContent = err.message;
+            }
+        }
+
+        function setupOTPQR() {
+            // Generate TOTP secret (base32, 20 bytes random)
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+            totpSecret = '';
+            for (let i = 0; i < 32; i++) totpSecret += chars[Math.floor(Math.random() * chars.length)];
+            const otpauth = `otpauth://totp/${email}?secret=${totpSecret}&issuer=Millionaire%20Email`;
+            document.getElementById('qr-code').innerHTML = '';
+            new QRCode(document.getElementById('qr-code'), otpauth);
+            document.getElementById('otp-setup').classList.remove('hidden');
+        }
+
+        async function toggleOTP() {
+            const enabled = document.getElementById('otp-status').textContent.includes('Enabled');
+            if (enabled) {
+                // Disable
+                try {
+                    const body = [{ type: "disableOTP" }];
+                    const response = await apiFetch(`${API_BASE}/account/auth`, 'POST', body);
+                    if (!response.ok) throw new Error('Failed to disable 2FA');
+                    loadOTPStatus();
+                } catch (err) {
+                    document.getElementById('otp-error').textContent = err.message;
+                }
+            } else {
+                // Enable after verify
+                enableOTP();
+            }
+        }
+
+        async function enableOTP() {
+            const code = document.getElementById('otp-code').value.trim();
+            if (!code) return;
+            // Client-side verify (optional; server may verify too)
+            // Note: For production, use a TOTP library to verify code against secret
+            try {
+                const body = [{ type: "enableOTP", secret: totpSecret }];
+                const response = await apiFetch(`${API_BASE}/account/auth`, 'POST', body);
+                if (!response.ok) throw new Error('Failed to enable 2FA');
+                document.getElementById('otp-setup').classList.add('hidden');
+                loadOTPStatus();
+            } catch (err) {
+                document.getElementById('otp-error').textContent = err.message;
+            }
+        }
+
+        function requestDelete() {
+            const mailto = `mailto:info@millionaire.email?subject=Delete Account Request&body=Please delete my account: ${email}`;
+            window.location.href = mailto;
+            document.getElementById('delete-msg').classList.remove('hidden');
+        }
+
+        async function apiFetch(url, method = 'GET', body = null) {
+            const headers = {
+                'Authorization': `Basic ${sessionStorage.getItem('auth') || auth}`,
+                'Content-Type': 'application/json'
+            };
+            return fetch(url, {
+                method,
+                headers,
+                body: body ? JSON.stringify(body) : null
+            });
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            location.reload();
+        }
+
+        // Load from session if available
+        if (sessionStorage.getItem('auth')) {
+            auth = sessionStorage.getItem('auth');
+            email = sessionStorage.getItem('email');
+            principalId = sessionStorage.getItem('principalId');
+            showDashboard();
+            loadDashboardData();
+        }
+    </script>
 </body>
 </html>
